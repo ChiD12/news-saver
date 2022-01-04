@@ -20,12 +20,12 @@ router.get('/george', async (req, res) => {
   res.status(200).json(movie);
 });
 
-router.get('/user/:name', async (req, res) => {
+router.post('/users/:name', async (req, res) => {
   await service.postUserString(req.params.name);
   res.status(204).send();
 });
 
-router.get('/getusers', async (req, res) => {
+router.get('/users', async (req, res) => {
   const allUsers = await service.getAllUsers();
   res.status(200).json(allUsers);
 });
