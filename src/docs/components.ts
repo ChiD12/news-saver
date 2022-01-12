@@ -3,9 +3,29 @@ export const components = {
     schemas: {
       // id model
       name: {
-        type: 'string', // data type
-        description: 'Name of User', // desc
-        example: 'Daniel' // example of an id
+        type: 'string',
+        description: 'Name of User',
+        example: 'Daniel'
+      },
+      password: {
+        type: 'string',
+        description: 'password',
+        example: 'password'
+      },
+      email: {
+        type: 'string',
+        description: 'email associated with the account',
+        example: 'email@gmail.com'
+      },
+      deviceType: {
+        type: 'string',
+        description: 'type of device, either andorid or browser',
+        example: 'android'
+      },
+      deviceId: {
+        type: 'string',
+        description: 'External device id',
+        example: '123'
       },
       User: {
         type: 'object',
@@ -20,18 +40,31 @@ export const components = {
           }
         }
       },
-      TodoInput: {
+      userInput: {
         type: 'object',
         properties: {
-          title: {
-            type: 'string',
-            description: "Todo's title",
-            example: 'Coding in JavaScript'
+          name: {
+            $ref: '#/components/schemas/name'
           },
-          completed: {
-            type: 'boolean',
-            description: 'The status of the todo',
-            example: false
+          password: {
+            $ref: '#/components/schemas/password'
+          }
+        }
+      },
+      loginInput: {
+        type: 'object',
+        properties: {
+          name: {
+            $ref: '#/components/schemas/name'
+          },
+          password: {
+            $ref: '#/components/schemas/password'
+          },
+          deviceType: {
+            $ref: '#/components/schemas/deviceType'
+          },
+          deviceId: {
+            $ref: '#/components/schemas/deviceId'
           }
         }
       },

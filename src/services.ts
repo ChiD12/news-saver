@@ -1,51 +1,47 @@
-import { UserRepo } from './repo';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-const FCM = require('fcm-node');
+import { Device, LoginDto, LoginInput, UserInput, UserRepo, UserService } from './interfaces/interfaces';
+import { sendDevice } from './messageQSender';
 
-export const createUserService = (repo: UserRepo) => {
-  const postUserString = (name: string) => {
-    return repo.insert(name).catch(console.dir);
-  };
-
-  const getMovies = () => {
-    return repo.run();
+export const createUserService = (repo: UserRepo): UserService => {
+  const postUser = async (user: UserInput) => {
+    const hashedUser = user;
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    hashedUser.password = hashedPassword;
+    return repo.insertUser(hashedUser).catch(console.dir);
   };
 
   const getAllUsers = () => {
     return repo.getAll();
   };
 
-  const sendPush = async () => {
-    const user = await repo.getUser();
-    if (user == null) return;
+  const login = async (loginInput: LoginInput) => {
+    const user = await repo.getUserByName(loginInput.name);
+    if (user === null) return null;
+    const correctPassword = await bcrypt.compare(loginInput.password, user.password);
 
-    console.log(user?.name);
-    const serverKey = process.env.FIREBASE_KEY;
-    const fcm = new FCM(serverKey);
+    if (!correctPassword) return 'BADPASS';
 
-    const message = {
-      to: `${user.name}`,
-      notification: {
-        title: 'NotifcatioTestAPP',
-        body: '{"Message from node js app"}'
-      },
-
-      data: {
-        title: 'ok cdfsdsdfsd',
-        body: '{"name" : "okg ooggle ogrlrl","product_id" : "123","final_price" : "0.00035"}'
-      }
+    const device: Device = {
+      deviceType: loginInput.deviceType,
+      externalDeviceId: loginInput.deviceId,
+      userId: user.id
     };
+    repo.insertDevice(device, user.name);
+    sendDevice(device, false);
 
-    fcm.send(message, (err: string, response: string) => {
-      if (err) {
-        console.log(`Something has gone wrong: ${err}`);
-        console.log(`Response: ${response}`);
-      } else {
-        // showToast("Successfully sent with response");
-        console.log('Successfully sent with response: ', response);
-      }
-    });
+    const tokenData: LoginDto = {
+      name: user.name,
+      userId: user.id,
+      deviceType: loginInput.deviceType,
+      externalDeviceId: loginInput.deviceId
+    };
+    return jwt.sign(tokenData, process.env.JWT_KEY!);
   };
 
-  return { postUserString, getMovies, getAllUsers, sendPush };
+  return { postUser, getAllUsers, login };
 };
+
+// const decoded = jwt.verify(token, 'shhh');
+// console.log(decoded);

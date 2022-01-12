@@ -1,68 +1,84 @@
+/* eslint-disable no-underscore-dangle */
 import { MongoClient, WithId, Document } from 'mongodb';
-
-export interface UserRepo {
-  run(): Promise<WithId<Document>[]>;
-  insert(name: string): Promise<void>;
-  getAll(): Promise<WithId<Document>[]>;
-  getUser(): Promise<WithId<Document> | null>;
-}
+import { Device, User, UserInput, UserRepo } from './interfaces/interfaces';
 
 export const createRepo = (client: MongoClient): UserRepo => {
-  // const client = new MongoClient(uri);
-  // await client.connect();
-  const run = async () => {
-    const database = client.db('sample_mflix');
-    const movies = database.collection('movies');
-    // Query for a movie that has the title 'Back to the Future'
-    const query = { rated: 'UNRATED' };
-    const movie = await movies.find(query).toArray();
-
-    console.log(movie);
-    return movie;
-  };
-
-  const insert = async (name: string) => {
+  const insertUser = async (user: UserInput) => {
     const database = client.db('news');
-    const user = database.collection('user');
+    const usersCollection = database.collection('user');
     const options = { upsert: true };
-    // create a document to insert
-    const doc = {
-      name
+    const filter = {
+      name: user.name
     };
 
-    const updateDoc = {
-      $set: {
-        name
+    const doc = {
+      $setOnInsert: {
+        name: user.name,
+        password: user.password,
+        email: user.email,
+        devices: []
       }
     };
-    const result = await user.updateOne(doc, updateDoc, options);
+
+    const result = await usersCollection.updateOne(filter, doc, options);
     console.log(`A document was inserted with the _id: ${result.upsertedId}`);
+    if (result.upsertedId === null) return false;
+    return true;
+  };
+
+  const insertDevice = async (device: Device, userName: string) => {
+    const database = client.db('news');
+    const usersCollection = database.collection('user');
+    const filter = {
+      name: userName
+    };
+
+    const doc = {
+      $addToSet: {
+        devices: {
+          deviceType: device.deviceType,
+          externalDeviceId: device.externalDeviceId,
+          userId: device.userId
+        }
+      }
+    };
+
+    const result = await usersCollection.updateOne(filter, doc);
+    console.log(`A document was inserted with the _id: ${result.upsertedId}`);
+    if (result.upsertedId === null) return false;
+    return true;
   };
 
   const getAll = async () => {
     const database = client.db('news');
-    const movies = database.collection('user');
-    // Query for a movie that has the title 'Back to the Future'
+    const usersCollection = database.collection('user');
     const query = {};
-    const users = await movies.find(query).toArray();
-
+    const documents = await usersCollection.find(query).toArray();
+    const users: User[] = documents.map((doc: WithId<Document>) => {
+      return { id: doc.id, name: doc.name, password: doc.password, email: doc.email, devices: doc.devices };
+    });
     console.log(users);
     return users;
   };
 
-  const getUser = async () => {
+  const getUserByName = async (name: string) => {
     const database = client.db('news');
-    const movies = database.collection('user');
-    // Query for a movie that has the title 'Back to the Future'
+    const usersCollection = database.collection('user');
     const query = {
-      name:
-        'fqPbK7AHQre2MgspsYolYF:APA91bGgPno3WJV29atuPYiJbcimZgFynBpXZR5Kt22Zf-CPdWNYY4w6R2ua-6-GkWpOZgr4iky1c9tWH_f9EXghzVNQvMpYScmaeuAA1qHKV_SuX7lMsbLhGE0TeBdLlMPQXlWPDjnl'
+      name
     };
-    const user = await movies.findOne(query);
-
+    const document = await usersCollection.findOne(query);
+    if (document === null) return null;
+    const user: User = {
+      id: document._id.toString(),
+      name: document.name,
+      email: document.email,
+      password: document.password,
+      devices: document.devices
+    };
     console.log(user);
     return user;
   };
 
-  return { run, insert, getAll, getUser };
+  return { insertUser, insertDevice, getAll, getUserByName };
 };

@@ -1,7 +1,11 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
+import { celebrate, Segments } from 'celebrate';
+
+import { UserSchema, LoginSchema } from './schema/schema';
 import { createUserService } from './services';
 import { createRepo } from './repo';
+import { UserInput, LoginInput } from './interfaces/interfaces';
 
 export const router = express.Router();
 
@@ -10,19 +14,14 @@ const client = new MongoClient(uri!);
 client.connect();
 const service = createUserService(createRepo(client));
 
-router.get('/', (req, res) => {
-  console.log('in route');
-  res.status(200).json('Hello World test 2');
-});
-
-router.get('/george', async (req, res) => {
-  const movie = await service.getMovies().catch(console.dir);
-  res.status(200).json(movie);
-});
-
-router.post('/users/:name', async (req, res) => {
-  await service.postUserString(req.params.name);
-  res.status(204).send();
+router.post('/users', celebrate({ [Segments.BODY]: UserSchema }), async (req, res) => {
+  const user = req.body as UserInput;
+  const uniqueName = await service.postUser(user);
+  if (!uniqueName) {
+    res.status(403).send('User already exists');
+  } else {
+    res.status(204).send();
+  }
 });
 
 router.get('/users', async (req, res) => {
@@ -30,7 +29,14 @@ router.get('/users', async (req, res) => {
   res.status(200).json(allUsers);
 });
 
-router.get('/sendpush', async (req, res) => {
-  await service.sendPush();
-  res.status(200).json('successful');
+router.post('/login', celebrate({ [Segments.BODY]: LoginSchema }), async (req, res) => {
+  const login = req.body as LoginInput;
+  const result = await service.login(login);
+  if (result === null) {
+    res.status(404).json('Username not found');
+  } else if (result === 'BADPASS') {
+    res.status(403).json('Password or username is incorrect');
+  } else if (result) {
+    res.status(200).json(result);
+  }
 });

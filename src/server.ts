@@ -1,5 +1,6 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
+import { errors } from 'celebrate';
 
 require('dotenv').config();
 
@@ -23,12 +24,11 @@ app.use(express.json());
 
 app.use('/', indexRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(docs));
-// app.use(errors());
-// app.use((error, req, res, next) => {
-//     // Bad request error
-//     res.status(400)
-//     res.json(error)
-// })
+app.use(errors());
+app.use((error: any, req: any, res: any, next: any) => {
+  res.status(400);
+  next(error);
+});
 
 // app.listen(process.env.PORT || 3000);
 

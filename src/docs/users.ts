@@ -22,27 +22,21 @@ export const users = {
           }
         }
       }
-    }
-  }
-};
-
-export const usersParam = {
-  '/users/{name}': {
+    },
     post: {
       tags: ['Users'],
       description: 'Create new user',
       operationId: 'create_user',
-      parameters: [
-        {
-          name: 'name',
-          in: 'path',
-          schema: {
-            $ref: '#/components/schemas/name'
-          },
-          required: true,
-          description: 'Name of user'
+      parameters: [],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/userInput'
+            }
+          }
         }
-      ],
+      },
       responses: {
         204: {
           description: 'User successfuly created'
