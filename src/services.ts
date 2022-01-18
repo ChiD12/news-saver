@@ -42,6 +42,3 @@ export const createUserService = (repo: UserRepo): UserService => {
 
   return { postUser, getAllUsers, login };
 };
-
-// const decoded = jwt.verify(token, 'shhh');
-// console.log(decoded);
