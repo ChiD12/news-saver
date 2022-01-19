@@ -3,7 +3,7 @@ import { Device, DeviceDto } from './interfaces/interfaces';
 const amqp = require('amqplib/callback_api');
 
 export const sendDevice = (device: Device, updateDevice: boolean) => {
-  amqp.connect(process.env.RMQ, (error: any, connection: any) => {
+  amqp.connect(process.env.CLOUDAMQP_URL, (error: any, connection: any) => {
     if (error) {
       throw error;
     }
