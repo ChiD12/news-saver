@@ -37,8 +37,19 @@ export const createUserService = (repo: UserRepo): UserService => {
       deviceType: loginInput.deviceType,
       externalDeviceId: loginInput.deviceId
     };
-    return jwt.sign(tokenData, process.env.JWT_KEY!);
+    return jwt.sign(tokenData, process.env.JWT_KEY!, { expiresIn: '30d' });
   };
 
-  return { postUser, getAllUsers, login };
+  const checkTokenExpiry = (token: string) => {
+    try {
+      jwt.verify(token, process.env.JWT_KEY!);
+      // return Date.now() >= decoded.iat * 1000
+    } catch (err) {
+      if (err instanceof jwt.TokenExpiredError) return 'Token Expired';
+      return 'Invalid Token';
+    }
+    return 'Valid Token';
+  };
+
+  return { postUser, getAllUsers, login, checkTokenExpiry };
 };

@@ -52,4 +52,5 @@ export interface UserService {
   postUser(user: UserInput): Promise<boolean | void>;
   getAllUsers(): Promise<User[]>;
   login(loginInput: LoginInput): Promise<string | null>;
+  checkTokenExpiry(token: string): string;
 }

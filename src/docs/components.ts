@@ -27,6 +27,20 @@ export const components = {
         description: 'External device id',
         example: '123'
       },
+      token: {
+        type: 'string',
+        description: 'jwt token',
+        example:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGFuaWVsIiwidXNlcklkIjoiNjFkN2M4MzNhMjQ1YzA1NWI2ZjYzYTk3IiwiZGV2aWNlVHlwZSI6ImFuZHJvaWQiLCJleHRlcm5hbERldmljZUlkIjoiMTIzIiwiaWF0IjoxNjQyNTU2NjQ1LCJleHAiOjE2NDI1NTY3MDV9.90iVdH3S_TNgtGZjR-ALHORralodEE1UO70ZZoooVMU'
+      },
+      Token: {
+        type: 'object',
+        properties: {
+          token: {
+            $ref: '#/components/schemas/token'
+          }
+        }
+      },
       User: {
         type: 'object',
         properties: {

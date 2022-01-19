@@ -40,3 +40,14 @@ router.post('/login', celebrate({ [Segments.BODY]: LoginSchema }), async (req, r
     res.status(200).json(result);
   }
 });
+
+router.get('/users', async (req, res) => {
+  const allUsers = await service.getAllUsers();
+  res.status(200).json(allUsers);
+});
+
+router.post('/checktokenexpiry', async (req, res) => {
+  const { token } = req.body;
+  const response = service.checkTokenExpiry(token);
+  res.status(200).json(response);
+});
