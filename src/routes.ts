@@ -29,7 +29,7 @@ router.get('/users', async (req, res) => {
   res.status(200).json(allUsers);
 });
 
-router.post('/login', celebrate({ [Segments.BODY]: LoginSchema }), async (req, res) => {
+router.post('/login', async (req, res) => {
   const login = req.body as LoginInput;
   const result = await service.login(login);
   if (result === null) {
@@ -37,7 +37,7 @@ router.post('/login', celebrate({ [Segments.BODY]: LoginSchema }), async (req, r
   } else if (result === 'BADPASS') {
     res.status(403).json('Password or username is incorrect');
   } else if (result) {
-    res.status(200).json(result);
+    res.status(200).json({ token: result });
   }
 });
 
