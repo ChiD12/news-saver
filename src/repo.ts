@@ -44,8 +44,8 @@ export const createRepo = (client: MongoClient): UserRepo => {
     };
 
     const result = await usersCollection.updateOne(filter, doc);
-    console.log(`A document was inserted with the _id: ${result.upsertedId}`);
-    if (result.upsertedId === null) return false;
+    console.log(`A document was upserted with the _id: ${result.upsertedId}`);
+    if (result.modifiedCount === 0) return false;
     return true;
   };
 

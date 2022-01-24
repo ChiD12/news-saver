@@ -28,8 +28,9 @@ export const createUserService = (repo: UserRepo): UserService => {
       externalDeviceId: loginInput.deviceId,
       userId: user.id
     };
-    repo.insertDevice(device, user.name);
-    sendDevice(device, false);
+    if (await repo.insertDevice(device, user.name)) {
+      sendDevice(device, false);
+    }
 
     const tokenData: LoginDto = {
       name: user.name,

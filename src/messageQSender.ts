@@ -12,6 +12,7 @@ export const sendDevice = (device: Device, updateDevice: boolean) => {
         throw error1;
       }
 
+      console.log(`sending ${device} to push service`);
       const queue = 'sendDevice_Queue';
       const msg: DeviceDto = { device, updateDevice };
 
